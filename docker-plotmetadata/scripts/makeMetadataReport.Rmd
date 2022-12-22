@@ -105,7 +105,7 @@ mydf <- read.delim(inFile)
 
 # show number of samples
 ns <- nrow(mydf)
-cn <- matrix(colnames(mydf), length(colnames(mydf)))
+cn <- data.frame(metrics=colnames(mydf))
 # show number of study_accession:
 sa=unique(mydf$study_accession)
 sal=length(sa)
@@ -129,7 +129,7 @@ cat(" ")
 
 ```{r meraics, echo = F}
 # print colnames
-kable(cn, "simple")
+knitr::kable(cn, "simple", booktabs=TRUE, col.names = NULL)
 
 cat(" ")
 
@@ -143,8 +143,6 @@ cat(" ")
 
 ```
 # Bar charts for selected metadata
-
-
 
 ## Description of selected metadata
 
@@ -177,8 +175,6 @@ cat(" ")
 **run_total_spots** - equivalent to spots on an array or sequence reads in a NGS experiment
 
 **run_total_bases** - total number of bases in the library (function of number of reads and read length)
-
-
 
 ## Bar plot figure legend
 
@@ -234,9 +230,9 @@ for ( i in 1:n_tab ) {
      file=paste0(figs_tmp_dir, "/",i,"_spots.png")
      # make plot   
 	div_factor=1e6
-      crp<-ggplot(meta_d_list[[i]], aes(x=study_accession, y=run_total_spots/div_factor)) + 
+      crp<-ggplot(meta_d_list[[i]], aes(x=study_accession, col=instrument, y=run_total_spots/div_factor)) + 
               theme_classic()+
-              geom_point(col="tomato2", size=3) +   # Draw points
+              geom_point( size=3) +   # Draw points
               geom_segment(aes(x=study_accession, 
                                xend=study_accession, 
                                y=min(run_total_spots/div_factor), 
@@ -323,21 +319,21 @@ base_file_l <- paste(figs_tmp_dir, base_file_list, sep = "/")
 
 # Dot plots for selected metadata give an appreciation of the number of libraires per study and data volume
 
-
+# Dot plot figure legends
 
 ##  Dot plots for run_total_spots per library in study_accession
 
 X axis shows run_total_spots in millions.
 
 Study accession number is on the vertical axis. Each dot shows a number of single-end reads (run_total_spots) per library 
-for a given study_accession id. 
+for a given study_accession id. Dot color corresponds to the metric instrument.
 
 
 ##  Dot plots for mean run_total_bases per library in study_accession
 
 X axis shows mean value of run_total_bases in millions.
 
-Study accession number is on the vertical axis. Each dot represents mean run_total_bases in a given study_accession id. Dot size is proportional to the total number of reads (single and paired) in a study.
+Study accession number is on the vertical axis. Each dot represents mean run_total_bases in a given study_accession id. Dot size is proportional to the total number of reads (single and paired combined) in a study.
 
 ```{r plots print, echo=FALSE}
 

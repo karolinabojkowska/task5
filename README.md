@@ -24,7 +24,7 @@ The script takes three arguments
 - output_dir_absolute_path : absolute path to the working directory where the results will be output
 - metrics_file_format : format of the output file - pdf or html
 
-## Usage example for "mouse liver Chip-seq embryo Illumina" query for an output directory /home/karo/Documents/report and format pdf
+#### Usage example for "mouse liver Chip-seq embryo Illumina" query for an output directory /home/karo/Documents/report and format pdf
 ```
 /path/to/sra_query_report.sh "mouse liver Chip-seq embryo Illumina" /home/karo/Documents/report pdf
 ```

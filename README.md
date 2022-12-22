@@ -42,6 +42,7 @@ You need docker daemon to rebuild the docker image. See https://docs.docker.com/
 
 Additional information about the docker images and their functioning are in the README.md files in the docker directories.
 
+To build the docker image:
 ```
 cd docker-pysradb
 
@@ -60,9 +61,9 @@ There are many possible changes and developments to my proposed solution.
 It would be useful to have an additional way to retrieve detailed metadata for pre-selected studies. This would also allow accessing the http paths to fastq files. One could imagine subsetting the metrics table with a user-specified `config.txt` file with the values for specific metrics in the following format: 
 
 `$ cat config.txt`
-`organism_name=Mus musculus`
-`instrument=Illumina Hiseq 2500,Illumina Novaseq 6000`
-`library_strategy=cDNA,RT-PCR`
+	`organism_name=Mus musculus`
+	`instrument=Illumina Hiseq 2500,Illumina Novaseq 6000`
+	`library_strategy=cDNA,RT-PCR`
 
 We could then use the (adapted) python script `docker-pysradb/scripts/get_sra_metadata.py` to retrieve detailed metadata for specific library accession numbers and maybe plot some additional metadata to get further insight into the study metadata.
 

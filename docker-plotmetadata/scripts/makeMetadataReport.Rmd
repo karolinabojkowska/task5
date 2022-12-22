@@ -1,0 +1,352 @@
+```{r inline_args, echo=FALSE}
+args <- commandArgs(TRUE)
+
+query = args[1]
+inFile= args[2]
+#query = "mouse liver Chip-seq embryo Illumina"
+#inFile="/home/karo/Documents/tests/cat_retina_rna-seq_Table.tab"
+output_path=dirname(normalizePath(inFile))
+```
+---
+title: "Metadata summary"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# make directory for figures
+subDir ="figs_tmp"
+dir.create(file.path(output_path, subDir), showWarnings = F)
+figs_tmp_dir=file.path(output_path, subDir)
+
+```
+
+## This is a summary for selected metadata obtained from the SRA repository with the query search : "`r query`".
+
+```{r libs and functions, include=FALSE}
+# import packages
+library(knitr)
+library(ggplot2)
+library(tibble)
+#library(kableExtra)
+library(dplyr)
+
+###############################  Functions ################################
+
+# make barplot for input metric
+metric_barplot <- function(df, metric) {
+  ggplot(data= df, 
+         aes(x = .data[[metric]], 
+             fill = .data[[metric]])) +
+    theme_classic() +
+    ggtitle(paste0("Bar chart of ", metric, "\n"))+
+    theme(plot.title = element_text(size=13))   +
+    theme(legend.text=element_text(size=9))+
+    theme(legend.title=element_text(size=12))+
+    theme(legend.position = "bottom")+
+    guides(fill = guide_legend(ncol = 3,title.position = "top",title.hjust = 0.5))+
+    theme(axis.title.y=element_text(size=11))+
+    theme(axis.ticks.x = element_blank())+
+    theme(axis.title.x=element_blank())+
+    theme(axis.text.x = element_blank()) +
+    ylab("Number of samples\n") +
+    geom_bar()+
+    geom_text(aes(label = after_stat(count)),stat="count", vjust = -0.2, size=3)
+
+}
+
+# make png plot
+make_png <- function(plottt, title){
+  png(title, width = 960, height = 960,res = 150)
+  print(plottt)
+  cat("\n")
+  cat("\n")
+  invisible(dev.off())
+}
+
+## split metadata into list of data_frames
+split_meta_data_on_study_accession <- function(df,n, n_samp){
+  # """ splits meta data into several data frames each including 10x meta data for a max of "n" samples. 
+	#Take as input data frame (df) and number of samples per data_frame in the list (n) plus the number of unique accession ids in df. """
+  #print(n_samp)
+  df_list <- list()
+   if (n_samp <= n) {
+      df_list[[1]] <- df
+   } else {
+   # make a list of tables
+      # number of DF to split into so that there is max samples_per_table samples per df
+      n_df <- ceiling(n_samp/n)#round(n_samp/n,digits = 0)
+     # print(n_df)
+      # set first row number
+      first_row = 1
+      # iterate over data_frames number to add elements of the list
+      for (i in c(1:(n_df-1))) {
+        #print(i)
+         last_sample_name=unique(df$study_accession)[i*n]
+         last_row = max(which(df$study_accession==last_sample_name))
+         df_list[[i]] <- df[first_row:last_row,]
+         first_row = last_row+1
+      }
+      # last data frame in the list
+      previous_sample_name=unique(df$study_accession)[(n_df-1)*n]
+      f_row = max(which(df$study_accession==previous_sample_name))+1
+      df_list[[n_df]] <- df[f_row:nrow(df),]
+      }
+   df_list
+}
+
+```
+
+```{r get data, include=FALSE}
+## read data 
+mydf <- read.delim(inFile)
+
+# show number of samples
+ns <- nrow(mydf)
+cn <- matrix(colnames(mydf), length(colnames(mydf)))
+# show number of study_accession:
+sa=unique(mydf$study_accession)
+sal=length(sa)
+
+# select relevant metrics to show in barplot
+mm=c("organism_name", "library_source","library_selection",
+     "instrument", "library_layout","instrument_model_desc")
+## add metrics for dot plots
+mmall=c(mm,"run_total_spots","run_total_bases")
+# conv to matrix for print
+mmp <-matrix(mmall, length(mmall))
+
+cat(" ")
+
+```
+# Total samples retrieved : `r ns`
+
+# Different study_accession ids : `r sal`
+
+# Metadata available : 
+
+```{r meraics, echo = F}
+# print colnames
+kable(cn, "simple")
+
+cat(" ")
+
+```
+# Metadata selected for graphics :
+
+```{r selected, echo = F}
+kable(mmp, "simple")
+
+cat(" ")
+
+```
+# Bar charts for selected metadata
+
+
+
+## Description of selected metadata
+
+**instrument** - type of instrument used for library sequencing. Note differences in chemistry characteristics (list non exhaustive):
+
+	- Illumina Genome Analyzer, Hiseq 2000, 2500 - SBS four color chemistry, random flow cell
+
+	- Illumina Hiseq 4000, Hiseq X Ten - SBS four color chemistry, patterned flow cell
+
+	- Illumina Novaseq 6000 - SBS two color chemistry, patterned flow cell 
+
+	- Illumina Next Seq 500 and 550 - SBS two color chemistry, random flow cell
+
+	- PacBio RS II, Sequel, Sequel II - long read sequencing with SMRT technology
+	
+	- Oxford Nanopore, MinION, PromethION - native long read sequencing 
+
+**instrument_model_desc** - note presence of differences in sequencing technology used by Illumina, PacBio, Oxford Nanopore, Ion Torrent (list non exhaustive)
+
+**library_layout** 
+
+	- PAIRED : read 1 and read 2 in forward and reverse orientation, respectively
+
+	- SINGLE : read 1 only
+
+**library_selection** - molecular biology method used for selecting nucleic acid of interest 
+
+**library_source** - library derived from sample type : DNA (genomic) or RNA (transcriptomic) AMPLICON (PCR amplification of a specific genomic locus); (list non exhaustive)
+
+**run_total_spots** - equivalent to spots on an array or sequence reads in a NGS experiment
+
+**run_total_bases** - total number of bases in the library (function of number of reads and read length)
+
+
+
+## Bar plot figure legend
+
+Different metadata characteristics are represented with bars, each color corresponding to a different category.
+
+Y axis shows the number of samples within each category. Numbers above bars show numbers of samples in a given category.
+
+```{r plots, echo=FALSE, out.height=".9\\paperheight"}
+
+# make plots for all selected metrics
+plotss=list()
+for (i in mm){
+  pl <-  metric_barplot(mydf, i)
+  plotss[[i]] <- pl
+} 
+
+# make file names for all selected metrics
+fileNames=list()
+for (i in mm){
+  fn <-  paste0(figs_tmp_dir, "/",i,"_barplot.png")
+  fileNames[[i]] <- fn
+} 
+
+# print PNG files
+n_plotss <-length(plotss)
+for (v in 1:n_plotss ) {
+ make_png(plotss[[v]], fileNames[[v]])
+}
+
+# list PNG files
+plots_to_include_list <- list.files(path = figs_tmp_dir, pattern = "_barplot.png" )
+plots_to_include_l <- paste(figs_tmp_dir, plots_to_include_list, sep = "/")
+
+# include in file
+knitr::include_graphics(plots_to_include_l)
+cat("\n")
+cat(" ")
+
+```
+
+```{r plots dot make, echo=FALSE}
+
+############## run_total_bases
+
+# how many differnt accession numbers to group per study
+n_samp<-length(unique(mydf$study_accession)) 
+# split the meta data dataframe into a list of DF
+meta_d_list<-split_meta_data_on_study_accession(df=mydf,n=40,  n_samp = n_samp)
+# print run_total_spots to file
+n_tab <- length(meta_d_list)
+for ( i in 1:n_tab ) {
+     # specify output file
+     file=paste0(figs_tmp_dir, "/",i,"_spots.png")
+     # make plot   
+	div_factor=1e6
+      crp<-ggplot(meta_d_list[[i]], aes(x=study_accession, y=run_total_spots/div_factor)) + 
+              theme_classic()+
+              geom_point(col="tomato2", size=3) +   # Draw points
+              geom_segment(aes(x=study_accession, 
+                               xend=study_accession, 
+                               y=min(run_total_spots/div_factor), 
+                               yend=max(run_total_spots/div_factor)), 
+                           linetype="dashed", 
+                           size=0.1, col="grey90") +   # Draw dashed lines
+              labs(title="Dot Plot of run_total_spots in millions per library and study accession_number", 
+                   subtitle="run_total_spots = number of reads")+ 
+              ylab("Run total spots (millions)") +  
+	      theme(axis.title.y=element_blank())+
+              coord_flip()
+     #print plot to file
+     png(file, width =960 ,height =1300, res=150)
+        suppressWarnings(print(crp))
+     invisible(dev.off())
+          cat( "\n" )
+	  cat( "\n" )
+}
+## create a list with files to include in the PDF
+spots_file_list<-list.files(path = figs_tmp_dir, pattern = "*spots.png")
+spots_file_l <- paste(figs_tmp_dir, spots_file_list, sep = "/")
+
+
+
+############## run_total_bases
+
+# show total bases in a run with dotplot proportional to number of libraries per study
+# calc mean bases per project
+df1=aggregate(mydf$run_total_bases, list(mydf$study_accession), FUN=mean)
+colnames(df1)<-c("study_accession","mean_run_total_bases")
+rownames(df1)<-df1$study_accession
+library(dplyr)
+# calc number of libraries per study
+df2 <- mydf %>% count(study_accession,sort = T)
+colnames(df2)<-c("study_accession","number_of_libraries")
+rownames(df2)<-df2$study_accession
+# merge
+df3 <- data.frame(df1, number_of_libraries=df2[rownames(df1),"number_of_libraries"])
+#colnames(df3)<-c("study_accession","number_of_libraries","mean_run_total_bases")
+#sort
+df3<-df3[order(df3$number_of_libraries, decreasing = T),]
+# split
+meta_d2_list<-split_meta_data_on_study_accession(df=df3, n=40, n_samp = n_samp)
+# plot
+n_tab <- length(meta_d2_list)
+for ( i in 1:n_tab ) {
+     # specify output file
+     file=paste0(figs_tmp_dir, "/",i,"_bases.png")
+     # make plot    
+     div_factor=1e6
+     dp <-  ggplot(meta_d2_list[[i]], aes(x=study_accession, y=mean_run_total_bases/div_factor, label=number_of_libraries)) + 
+          theme_classic()+
+          geom_point(col="lightblue", aes(size=number_of_libraries), stat='identity' )+   # Draw points
+          geom_text(color="black", size=2, nudge_x = 0.3)+
+          geom_segment(aes(x=study_accession, 
+                           xend=study_accession, 
+                           y=min(mean_run_total_bases/div_factor), 
+                           yend=max(mean_run_total_bases/div_factor)), 
+                       linetype="dashed", 
+                       size=0.1, col="grey90") +   # Draw dashed lines
+          labs(title="Dot Plot of mean run_total_bases in millions  per study_accession", 
+               subtitle="Dot size corresponds to number of libraries per study_accession")+ 
+          ylab("Mean run total bases (millions)") + 
+	  theme(axis.title.y=element_blank())+
+	  theme(legend.position = "bottom")+
+	  theme(legend.direction = "horizontal")+
+	  coord_flip()
+    #print plot to file
+     png(file, width =960 ,height =1300, res=150)
+        suppressWarnings(print(dp))
+     invisible(dev.off())
+          cat( "\n" )
+          cat( "\n" )
+}
+
+## create a list with files to include in the PDF
+base_file_list<-list.files(path = figs_tmp_dir, pattern = "*bases.png")
+base_file_l <- paste(figs_tmp_dir, base_file_list, sep = "/")
+
+
+
+```
+\newpage
+
+# Dot plots for selected metadata give an appreciation of the number of libraires per study and data volume
+
+
+
+##  Dot plots for run_total_spots per library in study_accession
+
+X axis shows run_total_spots in millions.
+
+Study accession number is on the vertical axis. Each dot shows a number of single-end reads (run_total_spots) per library 
+for a given study_accession id. 
+
+
+##  Dot plots for mean run_total_bases per library in study_accession
+
+X axis shows mean value of run_total_bases in millions.
+
+Study accession number is on the vertical axis. Each dot represents mean run_total_bases in a given study_accession id. Dot size is proportional to the total number of reads (single and paired) in a study.
+
+```{r plots print, echo=FALSE}
+
+knitr::include_graphics(spots_file_l)
+
+knitr::include_graphics(base_file_l)
+
+```
+
+```{r end,include=F}
+
+

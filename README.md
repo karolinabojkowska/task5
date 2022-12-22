@@ -59,12 +59,12 @@ docker image ls
 There are many possible changes and developments to my proposed solution. 
 
 It would be useful to have an additional way to retrieve detailed metadata for pre-selected studies. This would also allow accessing the http paths to fastq files. One could imagine subsetting the metrics table with a user-specified `config.txt` file with the values for specific metrics in the following format: 
-
-`$ cat config.txt`
-	`organism_name=Mus musculus`
-	`instrument=Illumina Hiseq 2500,Illumina Novaseq 6000`
-	`library_strategy=cDNA,RT-PCR`
-
+```
+$ cat config.txt
+organism_name=Mus musculus
+instrument=Illumina Hiseq 2500,Illumina Novaseq 6000
+library_strategy=cDNA,RT-PCR
+```
 We could then use the (adapted) python script `docker-pysradb/scripts/get_sra_metadata.py` to retrieve detailed metadata for specific library accession numbers and maybe plot some additional metadata to get further insight into the study metadata.
 
 Said that, I believe that the best would be to make a web application that uses (some of) the docker containers I created. One could enter the query words and the app would retrieve the table with metadata. It could also propose (dynamic) graphs for given metrics from a drop-down menu that would facilitate library selection. 

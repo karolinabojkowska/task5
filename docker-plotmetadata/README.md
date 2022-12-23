@@ -1,6 +1,6 @@
 # docker-plotmetadata
 
-This repo contains the source files for a docker image stored in `karolinabojkowska/docker-plotmetadata`.
+This repo contains the source files for a docker image `docker-plotmetadata`.
 
 ## Table of contents
 * [Building docker image](#Building-docker-image)
@@ -9,8 +9,6 @@ This repo contains the source files for a docker image stored in `karolinabojkow
 * [Usage example](#Usage-example)
 
 ## Building docker image
-
-The source files can be found in the github repo : https://github.com/karolinabojkowska/docker-plotmetadata 
 
 You must clone the git repository first and navigate to it. 
 

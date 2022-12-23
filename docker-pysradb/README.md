@@ -1,6 +1,6 @@
 # docker-pysradb
 
-This repo contains the docker files for image stored in `karolinabojkowska/docker-pysradb`.
+This repo contains the  source files for image `docker-pysradb`.
 
 ## Table of contents
 * [Building docker image](#Building-docker-image)
@@ -10,8 +10,6 @@ This repo contains the docker files for image stored in `karolinabojkowska/docke
 * [Usage examples](#Usage-examples)
 
 ## Building docker image
-
-The source files can be found in the github repo : https://github.com/karolinabojkowska/docker-pysradb
 
 You must clone the git repository first and navigate to it. 
 

@@ -1,10 +1,15 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
 ```{r inline_args, echo=FALSE}
 args <- commandArgs(TRUE)
 
 query = args[1]
 inFile= args[2]
-#query = "mouse liver Chip-seq embryo Illumina"
-#inFile="/home/karo/Documents/tests/cat_retina_rna-seq_Table.tab"
+# query="Streptococcus human"
+# inFile="/home/karo/Documents/tests//Streptococcus_human_Table.tab"
 output_path=dirname(normalizePath(inFile))
 ```
 ---
@@ -46,7 +51,7 @@ metric_barplot <- function(df, metric) {
     theme(legend.text=element_text(size=9))+
     theme(legend.title=element_text(size=12))+
     theme(legend.position = "bottom")+
-    guides(fill = guide_legend(ncol = 3,title.position = "top",title.hjust = 0.5))+
+    guides(fill = guide_legend(ncol = 2,title.position = "top",title.hjust = 0.5))+
     theme(axis.title.y=element_text(size=11))+
     theme(axis.ticks.x = element_blank())+
     theme(axis.title.x=element_blank())+
@@ -54,26 +59,22 @@ metric_barplot <- function(df, metric) {
     ylab("Number of samples\n") +
     geom_bar()+
     geom_text(aes(label = after_stat(count)),stat="count", vjust = -0.2, size=3)
-
-}
+   }
 
 # make png plot
 make_png <- function(plottt, title){
-  png(title, width = 960, height = 960,res = 150)
-  print(plottt)
-  cat("\n")
+  png(title, width = 960, height = 960, res = 150)
+  suppressWarnings(print(plottt))
   cat("\n")
   invisible(dev.off())
 }
+# 
 
-## split metadata into list of data_frames
-split_meta_data_on_study_accession <- function(df,n, n_samp){
-  # """ splits meta data into several data frames each including 10x meta data for a max of "n" samples. 
-	#Take as input data frame (df) and number of samples per data_frame in the list (n) plus the number of unique accession ids in df. """
-  #print(n_samp)
+# splits metadata dataframe on a specific column name into a list of data frame for plotting
+split_meta_data <- function(mdf,n, n_samp, col){
   df_list <- list()
    if (n_samp <= n) {
-      df_list[[1]] <- df
+      df_list[[1]] <- mdf
    } else {
    # make a list of tables
       # number of DF to split into so that there is max samples_per_table samples per df
@@ -84,15 +85,15 @@ split_meta_data_on_study_accession <- function(df,n, n_samp){
       # iterate over data_frames number to add elements of the list
       for (i in c(1:(n_df-1))) {
         #print(i)
-         last_sample_name=unique(df$study_accession)[i*n]
-         last_row = max(which(df$study_accession==last_sample_name))
-         df_list[[i]] <- df[first_row:last_row,]
+         last_sample_name=(unique(mdf[,col])[n*i])
+         last_row = max(which(mdf[,col]==last_sample_name))
+         df_list[[i]] <- mdf[first_row:last_row,]
          first_row = last_row+1
       }
       # last data frame in the list
-      previous_sample_name=unique(df$study_accession)[(n_df-1)*n]
-      f_row = max(which(df$study_accession==previous_sample_name))+1
-      df_list[[n_df]] <- df[f_row:nrow(df),]
+      previous_sample_name=(unique(mdf[,col])[(n_df-1)*n])
+      f_row = max(which(mdf[,col]==previous_sample_name)+1)
+      df_list[[n_df]] <- mdf[f_row:nrow(mdf),]
       }
    df_list
 }
@@ -129,11 +130,13 @@ cat(" ")
 
 ```{r meraics, echo = F}
 # print colnames
-knitr::kable(cn, "simple", booktabs=TRUE, col.names = NULL)
+
+knitr::kable(cn, format = "latex", booktabs = TRUE, col.names = NULL)
 
 cat(" ")
 
 ```
+\newpage
 # Metadata selected for graphics :
 
 ```{r selected, echo = F}
@@ -176,38 +179,58 @@ cat(" ")
 
 **run_total_bases** - total number of bases in the library (function of number of reads and read length)
 
+\newpage
+
 ## Bar plot figure legend
 
 Different metadata characteristics are represented with bars, each color corresponding to a different category.
 
 Y axis shows the number of samples within each category. Numbers above bars show numbers of samples in a given category.
 
-```{r plots, echo=FALSE, out.height=".9\\paperheight"}
+For readability, if more than 10 values are present for given metric, the data are split over several bar plots.
 
-# make plots for all selected metrics
-plotss=list()
-for (i in mm){
-  pl <-  metric_barplot(mydf, i)
-  plotss[[i]] <- pl
-} 
+```{r make bar plots, include=FALSE}
 
-# make file names for all selected metrics
-fileNames=list()
-for (i in mm){
-  fn <-  paste0(figs_tmp_dir, "/",i,"_barplot.png")
-  fileNames[[i]] <- fn
-} 
-
-# print PNG files
-n_plotss <-length(plotss)
-for (v in 1:n_plotss ) {
- make_png(plotss[[v]], fileNames[[v]])
+# choose number of values to plot on one plot so that it is readable
+n=10
+# loop over column name vector
+for (col in mm){
+        # order df by column value
+        md_temp=mydf[order(mydf[,col]),]
+        # how many different ids in the column of choice 
+        n_samp<-length(unique(md_temp[, col])) 
+        # split the meta data data frame into a list of DF
+        meta_d_list<-split_meta_data(mdf=md_temp, n=n,  n_samp = n_samp, col = col)
+        # how many data_frames after split
+        n_tab <- length(meta_d_list)
+        # make list of plots per pdf
+        plotss=list()
+        for ( i in 1:n_tab ) {
+          # make plots for all selected metrics
+             pl <-  metric_barplot(meta_d_list[[i]], col)
+             plotss[[i]] <- pl
+        }
+        # make file names for plots and selected metrics
+        fileNames=list()
+        for (y in 1:n_tab){
+            fn <-  paste0(figs_tmp_dir, "/",col,y,"_barplot.png")
+            fileNames[[y]] <- fn
+         }
+          # print PNG files
+         n_plotss <-length(plotss)
+         for (v in 1:n_plotss ) {
+            make_png(plotss[[v]], fileNames[[v]])
+         }
+    
+        cat( "\n" )
 }
 
 # list PNG files
 plots_to_include_list <- list.files(path = figs_tmp_dir, pattern = "_barplot.png" )
 plots_to_include_l <- paste(figs_tmp_dir, plots_to_include_list, sep = "/")
+```
 
+```{r plots, echo=FALSE, out.height=".8\\paperheight",out.width=".8\\paperwidth"}
 # include in file
 knitr::include_graphics(plots_to_include_l)
 cat("\n")
@@ -222,14 +245,14 @@ cat(" ")
 # how many differnt accession numbers to group per study
 n_samp<-length(unique(mydf$study_accession)) 
 # split the meta data dataframe into a list of DF
-meta_d_list<-split_meta_data_on_study_accession(df=mydf,n=40,  n_samp = n_samp)
+meta_d_list<-split_meta_data(mdf=mydf,n=40,  n_samp = n_samp, col="study_accession")
 # print run_total_spots to file
 n_tab <- length(meta_d_list)
 for ( i in 1:n_tab ) {
      # specify output file
      file=paste0(figs_tmp_dir, "/",i,"_spots.png")
      # make plot   
-	div_factor=1e6
+	   div_factor=1e6
       crp<-ggplot(meta_d_list[[i]], aes(x=study_accession, col=instrument, y=run_total_spots/div_factor)) + 
               theme_classic()+
               geom_point( size=3) +   # Draw points
@@ -275,14 +298,14 @@ df3 <- data.frame(df1, number_of_libraries=df2[rownames(df1),"number_of_librarie
 #sort
 df3<-df3[order(df3$number_of_libraries, decreasing = T),]
 # split
-meta_d2_list<-split_meta_data_on_study_accession(df=df3, n=40, n_samp = n_samp)
+meta_d2_list<-split_meta_data(mdf=df3, n=40, n_samp = n_samp, col="study_accession")
 # plot
 n_tab <- length(meta_d2_list)
 for ( i in 1:n_tab ) {
      # specify output file
      file=paste0(figs_tmp_dir, "/",i,"_bases.png")
      # make plot    
-     div_factor=1e6
+     div_factor=1e9
      dp <-  ggplot(meta_d2_list[[i]], aes(x=study_accession, y=mean_run_total_bases/div_factor, label=number_of_libraries)) + 
           theme_classic()+
           geom_point(col="lightblue", aes(size=number_of_libraries), stat='identity' )+   # Draw points
@@ -293,9 +316,9 @@ for ( i in 1:n_tab ) {
                            yend=max(mean_run_total_bases/div_factor)), 
                        linetype="dashed", 
                        size=0.1, col="grey90") +   # Draw dashed lines
-          labs(title="Dot Plot of mean run_total_bases in millions  per study_accession", 
+          labs(title="Dot Plot of mean run_total_bases in billions  per study_accession", 
                subtitle="Dot size corresponds to number of libraries per study_accession")+ 
-          ylab("Mean run total bases (millions)") + 
+          ylab("Mean run total bases (billions)") + 
 	  theme(axis.title.y=element_blank())+
 	  theme(legend.position = "bottom")+
 	  theme(legend.direction = "horizontal")+
@@ -328,6 +351,13 @@ X axis shows run_total_spots in millions.
 Study accession number is on the vertical axis. Each dot shows a number of single-end reads (run_total_spots) per library 
 for a given study_accession id. Dot color corresponds to the metric instrument.
 
+For readability, if more than 40 study_accession numbers are present, the data are split over several dot plots.
+
+```{r plots print spots, echo=FALSE}
+
+knitr::include_graphics(spots_file_l)
+```
+\newpage
 
 ##  Dot plots for mean run_total_bases per library in study_accession
 
@@ -335,9 +365,9 @@ X axis shows mean value of run_total_bases in millions.
 
 Study accession number is on the vertical axis. Each dot represents mean run_total_bases in a given study_accession id. Dot size is proportional to the total number of reads (single and paired combined) in a study.
 
-```{r plots print, echo=FALSE}
+For readability, if more than 40 study_accession numbers are present, the data are split over several dot plots.
 
-knitr::include_graphics(spots_file_l)
+```{r plots print bases, echo=FALSE}
 
 knitr::include_graphics(base_file_l)
 

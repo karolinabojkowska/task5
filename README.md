@@ -17,7 +17,7 @@ To use it you must first clone the current repository. You need docker daemon fo
 
 Usage :
 ```
-sra_query_report.sh <"query string"> <output_dir_absolute_path> <metics_file_format> ( pdf or html )
+bash sra_query_report.sh <"query string"> <output_dir_absolute_path> <metics_file_format> ( pdf or html )
 ```
 The script takes three arguments
 - query string : "a space separated list of key words"
@@ -26,7 +26,7 @@ The script takes three arguments
 
 #### Usage example for "mouse liver Chip-seq embryo Illumina" query for an output directory /home/karo/Documents/report and format pdf
 ```
-/path/to/sra_query_report.sh "mouse liver Chip-seq embryo Illumina" /home/karo/Documents/report pdf
+bash /path/to/sra_query_report.sh "mouse liver Chip-seq embryo Illumina" /home/karo/Documents/report pdf
 ```
 ## Building docker images
 

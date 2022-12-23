@@ -180,13 +180,13 @@ infomsg $log_file "Output report : $outputdir/$metadata_report"
 checkinstalledtool docker  $log_file
 
 # make images and evaluate
-infomsg $log_file "Making container : $IMAGE_pysradb" 
+infomsg $log_file "Making image : $IMAGE_pysradb" 
 cd $PATH_docker_pysradb
 docker build -t $IMAGE_pysradb . --network=host >> $log_file 2>&1
 checkdockerimagepull $IMAGE_pysradb $log_file 
 infomsg $log_file "Docker image $IMAGE_pysradb created"
 
-infomsg $log_file "Making container : $IMAGE_plotmetadata"
+infomsg $log_file "Making image : $IMAGE_plotmetadata"
 cd $PATH_docker_plotmetadata
 docker build -t $IMAGE_plotmetadata . --network=host >> $log_file 2>&1
 checkdockerimagepull $IMAGE_plotmetadata $log_file

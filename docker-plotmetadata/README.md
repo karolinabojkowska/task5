@@ -47,7 +47,7 @@ docker run -it --rm -u "$(id -u):$(id -g)" -v /path_to_wd/:/home/dockeruser/data
 ```
 ## Usage example for "mouse embryo chip-seq illumina" with SRA metadata in file /home/karo/Documents/mySRA.tab
 ```
-docker run -it -u "$(id -u):$(id -g)" --rm --network=host -v /home/karo/Documents/:/home/dockeruser/data/:rw docker-plotmetadata Rscript -e "rmarkdown::render('/home/dockeruser/code/makeMetadataReport.Rmd', output_format='pdf_document', output_file = '/home/dockeruser/data/data/MetadataReport.pdf')" "mouse embryo chip-seq illumina" /home/dockeruser/data/mySRA.tab
+docker run -it -u "$(id -u):$(id -g)" --rm --network=host -v /home/karo/Documents/:/home/dockeruser/data/:rw docker-plotmetadata Rscript -e "rmarkdown::render('/home/dockeruser/code/makeMetadataReport.Rmd', output_format='pdf_document', output_file = '/home/dockeruser/data/MetadataReport.pdf')" "mouse embryo chip-seq illumina" /home/dockeruser/data/mySRA.tab
 ```
 
 

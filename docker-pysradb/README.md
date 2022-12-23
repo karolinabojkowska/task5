@@ -4,9 +4,10 @@ This repo contains the docker files for image stored in `karolinabojkowska/docke
 
 ## Table of contents
 * [Building docker image](#Building-docker-image)
-* [Metadata retrieval script](#Metadata-retrieval-script)
+* [Metadata retrieval script for a single accession_number](#Metadata-retrieval-script-for-a-single-accession_number)
+* [Metadata retrieval script for a query](#Metadata-retrieval-script-for-a-query)
 * [Running container](#Running-container)
-* [Usage example for SRP265425 data set](#Usage-example-for-SRP265425-data-set)
+* [Usage examples](#Usage-examples)
 
 ## Building docker image
 
@@ -52,6 +53,8 @@ docker run karolinabojkowska/docker-pysradb:v1 python get_sra_metadata.py sra_id
 # you will need -v option to mount data file/folder if they are used as arguments. With the -u option you add user permissions.
 docker run -v /mydata/path/:/home/dockeruser/data/:rw -u "$(id -u):$(id -g)" karolinabojkowska/docker-pysradb:v1 python get_sra_metadata.py sra_id /home/dockeruser/data/file1.tab
 ```
+## Usage examples
+
 ### Usage example for SRP265425 data set for an output file located in /home/karo/Documents/
 ```
 docker run -it --rm --network=host -u "$(id -u):$(id -g)"  -v /home/karo/Documents/:/home/dockeruser/data/:rw docker-pysradb python get_sra_metadata.py SRP265425 /home/dockeruser/data/SRP265425.metadata.tab

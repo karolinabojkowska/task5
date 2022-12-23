@@ -52,11 +52,11 @@ docker run karolinabojkowska/docker-pysradb:v1 python get_sra_metadata.py sra_id
 # you will need -v option to mount data file/folder if they are used as arguments. With the -u option you add user permissions.
 docker run -v /mydata/path/:/home/dockeruser/data/:rw -u "$(id -u):$(id -g)" karolinabojkowska/docker-pysradb:v1 python get_sra_metadata.py sra_id /home/dockeruser/data/file1.tab
 ```
-## Usage example for SRP265425 data set for an output file located in /home/karo/Documents/
+### Usage example for SRP265425 data set for an output file located in /home/karo/Documents/
 ```
 docker run -it --rm --network=host -u "$(id -u):$(id -g)"  -v /home/karo/Documents/:/home/dockeruser/data/:rw docker-pysradb python get_sra_metadata.py SRP265425 /home/dockeruser/data/SRP265425.metadata.tab
 ```
-## Usage example for "mouse liver Chip-seq embryo Illumina" query for an output file /home/karo/Documents/myQuery.metadata.tab
+### Usage example for "mouse liver Chip-seq embryo Illumina" query for an output file /home/karo/Documents/myQuery.metadata.tab
 ```
 docker run -it --rm --network=host -u "$(id -u):$(id -g)" -v /home/karo/Documents/:/home/dockeruser/data/:rw docker-pysradb python search_sra_db.py "mouse liver Chip-seq embryo Illumina" /home/dockeruser/data/myQuery.metadata.tab
 ```

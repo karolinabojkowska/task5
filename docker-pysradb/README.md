@@ -38,7 +38,7 @@ Python script that retrieves the metadata for a specific query is under the `scr
 Usage :
 ```
 search_sra_db.py <"query"> <out_file>
-# input query : a space separated list of key words
+# input query : "a space separated list of key words"
 # outfile : output file (This should be in a a mounted host directory, so that the output file is visible from the host)
 
 ```

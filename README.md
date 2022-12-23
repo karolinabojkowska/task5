@@ -14,9 +14,9 @@ This repository contains my proposed solution for task5
 I made a report pipeline that takes advantage of two docker images for 
 
 
-1. retrieving metadata from the SRA database for a specific query (docker-pysradb) and saving it to TAB-separated file
+1. retrieving metadata from the SRA database for a specific query and saving it to TAB-separated file (docker-pysradb) 
 
-2. making a pdf / html report with selected metrics from the TAB-separated file 
+2. making a pdf / html report with selected metrics from the TAB-separated file (docker-plotmetadata) 
 
 
 Bash script that makes metadata report for a given query is under the `pipelines` directory and is called `sra_metadata_report.sh`.

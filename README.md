@@ -11,15 +11,21 @@ This repository contains my proposed solution for task5
 
 ## Metadata report pipeline
 
+I made a report pipeline that takes advantage of two docker images for 
+    1. retrieving metadata from the SRA database for a specific query (docker-pysradb) and saving it to TAB-separated file
+    2. making a pdf / html report with selected metrics from the TAB-separated file 
+
 Bash script that makes metadata report for a given query is under the `pipelines` directory and is called `sra_metadata_report.sh`.
 
-To use it you must first clone the current repository. You need docker daemon for the pipeline to work. See https://docs.docker.com/engine/ for downloading docker.
+To use it you must first clone the current repository. 
 
-Usage :
+You need docker daemon for the pipeline to work. See https://docs.docker.com/engine/ for downloading docker.
+
+`sra_metadata_report.sh` usage :
 ```
 bash sra_query_report.sh <"query string"> <output_dir_absolute_path> <metics_file_format> ( pdf or html )
 ```
-The script takes three arguments
+The script takes three arguments:
 - query string : "a space separated list of key words"
 - output_dir_absolute_path : absolute path to the working directory where the results will be output
 - metrics_file_format : format of the output file - pdf or html
@@ -38,10 +44,6 @@ If you want to modify and build the images yourself, the source files for docker
 
 You must clone the current repository first and navigate to the repo for which you want to build the image.
 
-You need docker daemon to rebuild the docker image. See https://docs.docker.com/engine/.
-
-Additional information about the docker images and their functioning are in the README.md files in the docker directories.
-
 To build the docker image:
 ```
 cd docker-pysradb
@@ -54,6 +56,8 @@ docker build -t docker-plotmetadata . # --network=host
 
 docker image ls
 ```
+Additional information about the docker images and their functioning are in the README.md files in the docker directories.
+
 ## Possible improvments
 
 There are many possible changes and developments to my proposed solution. 

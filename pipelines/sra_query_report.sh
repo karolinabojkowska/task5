@@ -55,13 +55,6 @@ function checkinstalledtool {
         fi
 }
 
-function checkdockerimage {
-        local tool=$1
-        
-	dim=$(docker image ls | grep $tool)
-	echo dim
-}
-
 function checkdockerimagepull {
 	local tool=$1
         local log_file=$2
